@@ -8,7 +8,7 @@ import uuid  # for generating random filename
 import os
 import tempfile
 from pdf2image import convert_from_path
-from PIL import ImageTk, Image
+from PIL import ImageTk, Image, ImageEnhance
 import io
 import random
 
@@ -43,8 +43,8 @@ class GUI(Tk):
         # window style
         style = ThemedStyle(self)
         style.set_theme("aquativo")
-        
-        #page number display
+
+        # page number display
         self.text = StringVar()
         self.text.set("Page " + "0/0")
 
@@ -134,15 +134,21 @@ class GUI(Tk):
 
         icon = PhotoImage(file='icon_rotate_left.png')
         button4 = Button(self.options_frame, text="Rotate 90°", image=icon, bd=3, compound="left",
-                         command=lambda: self.rotate_90_degrees(self.current_file.get_img(self.current_file.page)))
+                         command=lambda: self.rotate_90_degrees(self.current_file.get_img(
+                             self.current_file.page)))
         # this line is necessary for preventing icon to be garbage-collected, otherwise icon does not appear
         button4.image = icon
+
+        button5 = Button(self.options_frame, text="Enhance image", font=("Arial", 9), bd=3,
+                         command=lambda: self.enhance_image(self.current_file.get_img(
+                             self.current_file.page)))
 
         # packing buttons
         # button1.pack(padx=(170, 35), pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
         # button2.pack(padx=35, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
         button3.pack(padx=35, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
         button4.pack(padx=35, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
+        button5.pack(padx=35, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
 
         # entry box for entering numbers to display specific pages
         self.entry_frame = Frame(self.options_frame)
@@ -151,10 +157,11 @@ class GUI(Tk):
 
         left = Button(self.entry_frame, text="Previous Page", activebackground="black", activeforeground="white",
                       bg="green", bd=10, command=self.prev_page)
-        page_number = Label(self.entry_frame, textvariable = self.text)
-        right = Button(self.entry_frame, text ="Next Page",activebackground="black" , activeforeground="white",bg="green",bd=10,command = self.next_page)   
-        left.pack(side = LEFT)
-        page_number.pack(side = LEFT)
+        page_number = Label(self.entry_frame, textvariable=self.text)
+        right = Button(self.entry_frame, text="Next Page", activebackground="black", activeforeground="white",
+                       bg="green", bd=10, command=self.next_page)
+        left.pack(side=LEFT)
+        page_number.pack(side=LEFT)
         right.pack(side=LEFT)
 
     def scroll_on_mousewheel(self, canvas, event):
@@ -205,7 +212,7 @@ class GUI(Tk):
         for item in list:
             item.destroy()
         self.image_frame.pack_forget()
-        
+
     def close_files(self):
         self.close_image()
         self.text.set("Page " + "0/0")
@@ -235,6 +242,27 @@ class GUI(Tk):
 
         image = Image.open(filepath)
         image = image.rotate(90, expand=True)
+
+        os.remove(old_file)
+
+        image.save(filepath)
+        self.close_image()
+        self.upload_image(filepath)
+
+    def enhance_image(self, filepath):
+        """This function enhance the image to remove text bleed through"""
+        old_file = filepath
+
+        image = Image.open(filepath)
+
+        contrast_enhancer = ImageEnhance.Contrast(image)
+        bright_enhancer = ImageEnhance.Brightness(image)
+        # give the factor to adjust the image
+        contrast_image = contrast_enhancer.enhance(5)
+        bright_image = bright_enhancer.enhance(1.1)
+
+        image = contrast_image
+        image = bright_image
 
         os.remove(old_file)
 
@@ -283,7 +311,7 @@ class File:
 
         # file types/extensions allowed
         files = [("All Files", "*.*"), ("PDF", "*.pdf"), ("JPG", "*.jpg"), ("JPEG", "*.jpeg"), ("PNG", "*.png")]
-        
+
         if not files:
             gui.text.set("Page " + "0/0")
 
