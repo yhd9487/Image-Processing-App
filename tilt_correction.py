@@ -40,7 +40,7 @@ def correct_tilt(gui, filepath):
     else:
         angle = -angle
 
-    image = rotate_image(image, angle)  # added this function
+    #image = rotate_image(image, angle)  # added this function
 
     # rotate the image to fix tilt
     # determine the center (x, y)-coordinate of the image
@@ -49,10 +49,10 @@ def correct_tilt(gui, filepath):
 
     # pass the center coordinates and rotation angle into the cv2.getRotationMatrix2D
 
-    M = cv2.getRotationMatrix2D(center, 0, 1.0)
+    M = cv2.getRotationMatrix2D(center, angle, 1.0)
 
     # does the rotation
-    rotated = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE,
+    rotated = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_CONSTANT,
                              borderValue=(255, 255, 255))
 
     # read_file = cv2.imread(rotated)
@@ -62,41 +62,6 @@ def correct_tilt(gui, filepath):
     cv2.imwrite(old_file, rotated)
     gui.close_image()
     gui.upload_image(filepath)
-    # print("rotated")
+    return rotated
 
 
-def rotate_image(rotateImage, angle):
-    # Taking image height and width
-    imgHeight, imgWidth = rotateImage.shape[0], rotateImage.shape[1]
-
-    # Computing the centre x,y coordinates
-    # of an image
-    centreY, centreX = imgHeight // 2, imgWidth // 2
-
-    # Computing 2D rotation Matrix to rotate an image
-    rotationMatrix = cv2.getRotationMatrix2D((centreY, centreX), angle, 1.0)
-
-    # Now will take out sin and cos values from rotationMatrix
-    # Also used numpy absolute function to make positive value
-    cosofRotationMatrix = np.abs(rotationMatrix[0][0])
-    sinofRotationMatrix = np.abs(rotationMatrix[0][1])
-
-    # Now will compute new height & width of
-    # an image so that we can use it in
-    # warpAffine function to prevent cropping of image sides
-    newImageHeight = int((imgHeight * sinofRotationMatrix) +
-                         (imgWidth * cosofRotationMatrix))
-    newImageWidth = int((imgHeight * cosofRotationMatrix) +
-                        (imgWidth * sinofRotationMatrix))
-
-    # After computing the new height & width of an image
-    # we also need to update the values of rotation matrix
-    rotationMatrix[0][2] += (newImageWidth / 2) - centreX
-    rotationMatrix[1][2] += (newImageHeight / 2) - centreY
-
-    # Now, we will perform actual image rotation
-    rotatingimage = cv2.warpAffine(rotateImage, rotationMatrix, (newImageWidth + 40, newImageHeight),
-                                   flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE, borderValue=(255, 255, 255))
-    # added +40 to account for cropped out text when rotating image
-
-    return rotatingimage
