@@ -29,8 +29,11 @@ class GUI(Tk):
         self.configure(bg="#465CA5")  # bg = E6E6E6
 
         # setting window size and position
-        window_width = 900
+        window_width = 1030
         window_height = 720
+
+        # set the minimum window size
+        self.minsize(1030, 720)
 
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
@@ -143,12 +146,16 @@ class GUI(Tk):
                          command=lambda: self.enhance_image(self.current_file.get_img(
                              self.current_file.page)))
 
+        slideBar = Scale(self.options_frame, from_=0, to=10, orient=HORIZONTAL)
+
+
         # packing buttons
         # button1.pack(padx=(170, 35), pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
         # button2.pack(padx=35, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
         button3.pack(padx=35, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
         button4.pack(padx=35, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
         button5.pack(padx=35, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
+        slideBar.pack(padx=35, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
 
         # entry box for entering numbers to display specific pages
         self.entry_frame = Frame(self.options_frame)
