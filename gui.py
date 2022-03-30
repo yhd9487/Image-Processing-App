@@ -99,7 +99,7 @@ class GUI(Tk):
         # adds "Tesseract" to the menu
         menu.add_cascade(label="Tesseract", menu=tesseract)
 
-        # adds commands to the Tesseract menu
+        # Add commands to the Tesseract menu
         tesseract.add_command(label="Tesseract for Windows", command=lambda: tesseract_installation.open_for_windows())
         tesseract.add_command(label="Tesseract for Linux", command=lambda: tesseract_installation.open_for_linux())
         tesseract.add_command(label="Tesseract for MacOS", command=lambda: tesseract_installation.open_for_mac())
@@ -107,7 +107,7 @@ class GUI(Tk):
     def add_edit_options(self):
         # frame for buttons
         button_frame = Frame(self, height=125, bg="#FFD100", bd=0, highlightthickness=0)
-        # 223985 for dark blue color, #FF7789 for pink
+        # #223985 for dark blue color, #FF7789 for pink
 
         # packs the button frame
         button_frame.pack(side=TOP, fill=BOTH)
@@ -124,7 +124,7 @@ class GUI(Tk):
         # container for buttons
         self.options_frame = LabelFrame(button_frame, fg="green", bg="#FFD100",
                                         bd=3, labelanchor=NW, labelwidget=options_title)
-        self.options_frame.pack(padx=14.5, pady=(9, 18.5), fill=BOTH, expand=TRUE)
+        self.options_frame.pack(padx=6, pady=6, fill=BOTH, expand=TRUE)
 
         # makes option buttons
         # button1 = Button(self.options_frame, text="Copy Text to Clipboard", font=("Arial", 9), bd=3)
@@ -144,18 +144,22 @@ class GUI(Tk):
 
         button5 = Button(self.options_frame, text="Enhance image", font=("Arial", 9), bd=3,
                          command=lambda: self.enhance_image(self.current_file.get_img(
-                             self.current_file.page)))
+                             self.current_file.page), cSlideBar.get(), 1 + bSlideBar.get() / 10))
 
-        slideBar = Scale(self.options_frame, from_=0, to=10, orient=HORIZONTAL)
-
+        cSlideBar = Scale(self.options_frame, label="Contrast", from_=0, to=20, orient=HORIZONTAL)
+        bSlideBar = Scale(self.options_frame, label="Brightness", from_=0, to=20, orient=HORIZONTAL)
+        # set scale to to recommend value
+        cSlideBar.set(5)
+        bSlideBar.set(1)
 
         # packing buttons
         # button1.pack(padx=(170, 35), pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
         # button2.pack(padx=35, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
-        button3.pack(padx=35, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
-        button4.pack(padx=35, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
-        button5.pack(padx=35, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
-        slideBar.pack(padx=35, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
+        button3.pack(padx=20, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
+        button4.pack(padx=20, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
+        button5.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=LEFT)
+        cSlideBar.pack(padx=5, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
+        bSlideBar.pack(padx=5, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
 
         # entry box for entering numbers to display specific pages
         self.entry_frame = Frame(self.options_frame)
@@ -256,7 +260,7 @@ class GUI(Tk):
         self.close_image()
         self.upload_image(filepath)
 
-    def enhance_image(self, filepath):
+    def enhance_image(self, filepath, cvalue, bvalue):
         """This function enhance the image to remove text bleed through"""
         old_file = filepath
 
@@ -265,10 +269,12 @@ class GUI(Tk):
         contrast_enhancer = ImageEnhance.Contrast(image)
         bright_enhancer = ImageEnhance.Brightness(image)
         # give the factor to adjust the image
-        contrast_image = contrast_enhancer.enhance(5)
-        bright_image = bright_enhancer.enhance(1.1)
+        contrast_image = contrast_enhancer.enhance(cvalue)
+        bright_image = bright_enhancer.enhance(bvalue)
 
         image = contrast_image
+        image.save(filepath)
+
         image = bright_image
 
         os.remove(old_file)
