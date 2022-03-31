@@ -8,7 +8,7 @@ import uuid  # for generating random filename
 import os
 import tempfile
 from pdf2image import convert_from_path
-from PIL import ImageTk, Image
+from PIL import ImageTk, Image, ImageEnhance
 import io
 import random
 
@@ -29,8 +29,11 @@ class GUI(Tk):
         self.configure(bg="#465CA5")  # bg = E6E6E6
 
         # setting window size and position
-        window_width = 900
+        window_width = 1030
         window_height = 720
+
+        # set the minimum window size
+        self.minsize(1030, 720)
 
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
@@ -43,8 +46,8 @@ class GUI(Tk):
         # window style
         style = ThemedStyle(self)
         style.set_theme("aquativo")
-        
-        #page number display
+
+        # page number display
         self.text = StringVar()
         self.text.set("Page " + "0/0")
 
@@ -96,17 +99,18 @@ class GUI(Tk):
         # adds "Tesseract" to the menu
         menu.add_cascade(label="Tesseract", menu=tesseract)
 
-        # adds commands to the Tesseract menu
+        # Add commands to the Tesseract menu
         tesseract.add_command(label="Tesseract for Windows", command=lambda: tesseract_installation.open_for_windows())
         tesseract.add_command(label="Tesseract for Linux", command=lambda: tesseract_installation.open_for_linux())
         tesseract.add_command(label="Tesseract for MacOS", command=lambda: tesseract_installation.open_for_mac())
 
     def add_edit_options(self):
         # frame for buttons
-        button_frame = Frame(self, height=125, bg="#FFD100", bd=0, highlightthickness=0)
-        # 223985 for dark blue color, #FF7789 for pink
-
+        button_frame = Frame(self, height=130, bg="#FFD100", bd=0, highlightthickness=0)
+        # #223985 for dark blue color, #FF7789 for pink
+        button_frame2 = Frame(self, height=25, bg="#FFD100", bd=0, highlightthickness=0)
         # packs the button frame
+        button_frame2.pack(side=BOTTOM, fill=BOTH)
         button_frame.pack(side=TOP, fill=BOTH)
 
         # prevents "buttom_frame" from shrinking when packing "options_frame"
@@ -121,7 +125,11 @@ class GUI(Tk):
         # container for buttons
         self.options_frame = LabelFrame(button_frame, fg="green", bg="#FFD100",
                                         bd=3, labelanchor=NW, labelwidget=options_title)
-        self.options_frame.pack(padx=14.5, pady=(9, 18.5), fill=BOTH, expand=TRUE)
+        self.options_frame.pack(padx=6, pady=6, fill=BOTH, expand=TRUE)
+
+        self.options_frame2 = LabelFrame(button_frame2, fg="green", bg="#FFD100",
+                                        bd=1, labelanchor=NW, labelwidget=options_title)
+        self.options_frame2.pack(padx=2, pady=2, fill=BOTH, expand=TRUE)
 
         # makes option buttons
         # button1 = Button(self.options_frame, text="Copy Text to Clipboard", font=("Arial", 9), bd=3)
@@ -134,35 +142,105 @@ class GUI(Tk):
 
         icon = PhotoImage(file='icon_rotate_left.png')
         button4 = Button(self.options_frame, text="Rotate 90°", image=icon, bd=3, compound="left",
-                         command=lambda: self.rotate_90_degrees(self.current_file.get_img(self.current_file.page)))
+                         command=lambda: self.rotate_90_degrees(self.current_file.get_img(
+                             self.current_file.page)))
         # this line is necessary for preventing icon to be garbage-collected, otherwise icon does not appear
         button4.image = icon
+
+        button5 = Button(self.options_frame, text="Enhance image", font=("Arial", 9), bd=3,
+                         command=lambda: self.enhance_image(self.current_file.get_img(
+                             self.current_file.page), cSlideBar.get(), 1 + bSlideBar.get() / 10))
+
+        button6 = Button(self.options_frame2, text="+", font=("Arial", 9), bd=3,
+                         command=lambda: self.zoomimagelarger(self.current_file.get_img(
+                             self.current_file.page)))
+
+        button7 = Button(self.options_frame2, text="-", font=("Arial", 9), bd=3,
+                         command=lambda: self.zoomimagesmaller(self.current_file.get_img(
+                             self.current_file.page)))
+        cSlideBar = Scale(self.options_frame, label="Contrast", from_=0, to=20, orient=HORIZONTAL)
+        bSlideBar = Scale(self.options_frame, label="Brightness", from_=0, to=20, orient=HORIZONTAL)
+        # set scale to to recommend value
+        cSlideBar.set(5)
+        bSlideBar.set(1)
 
         # packing buttons
         # button1.pack(padx=(170, 35), pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
         # button2.pack(padx=35, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
-        button3.pack(padx=35, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
-        button4.pack(padx=35, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
+        button3.pack(padx=20, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
+        button4.pack(padx=20, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
+        button5.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=LEFT)
+        button6.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=RIGHT)
+        button7.pack(padx=5, pady=(0, 60), ipadx=5, ipady=5, side=RIGHT)
+        cSlideBar.pack(padx=5, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
+        bSlideBar.pack(padx=5, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
 
         # entry box for entering numbers to display specific pages
         self.entry_frame = Frame(self.options_frame)
         # self.entry_frame.pack(padx=35, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
         self.entry_frame.pack(padx=35, pady=(0, 14), expand=TRUE, side=LEFT)
 
-        left = Button(self.entry_frame, text="Previous Page", activebackground="black", activeforeground="white",
-                      bg="green", bd=10, command=self.prev_page)
-        page_number = Label(self.entry_frame, textvariable = self.text)
-        right = Button(self.entry_frame, text ="Next Page",activebackground="black" , activeforeground="white",bg="green",bd=10,command = self.next_page)   
-        left.pack(side = LEFT)
-        page_number.pack(side = LEFT)
+        left = Button(self.entry_frame, text="<", activebackground="lightskyblue", activeforeground="white",
+                      bg="steelblue", bd=10, command=self.prev_page)
+        page_number = Label(self.entry_frame, textvariable=self.text)
+        right = Button(self.entry_frame, text=">", activebackground="lightskyblue", activeforeground="white",
+                       bg="steelblue", bd=10, command=self.next_page)
+        left.pack(side=LEFT)
+        page_number.pack(side=LEFT)
         right.pack(side=LEFT)
 
     def scroll_on_mousewheel(self, canvas, event):
         canvas.yview_scroll(-1 * (event.delta // 120), "units")
 
     # getting an image and rendering it
+    def upload_file_image(self,image_fileimage):
+        from PIL import Image
+
+        baseheight = 560
+        basewidth = 400
+
+        img = Image.open(image_fileimage)
+        img = img.resize((basewidth, baseheight))
+        render = ImageTk.PhotoImage(img)
+        self.render = render  # prevent being garbage collected, might not show up the image otherwise
+        w, h = img.size
+        print("Image width:", w, "Height:", h)
+
+        # making frame for image canvas
+        frame = Frame(self.image_frame, bg="black")
+        canvas = Canvas(frame, height=h, width=w, bg="green")
+
+        # puts image into canvas and centers it
+        canvas.create_image(w / 2, h / 2, image=render)
+
+        # make 2 scrollbars
+        # "master = frame" puts scrollbar next to image. "master = root" puts scrollbar to the side of the main window
+        y_scrollbar = ttk.Scrollbar(self.image_frame, orient='vertical', command=canvas.yview)
+        x_scrollbar = ttk.Scrollbar(frame, orient='horizontal', command=canvas.xview)
+
+        canvas.configure(yscrollcommand=y_scrollbar.set)
+        canvas.configure(xscrollcommand=x_scrollbar.set)
+
+        # confines the scrolling region to be within the image height
+        canvas.configure(scrollregion=canvas.bbox("all"))
+
+        # makes canvas scroll along with the mousewheel
+        canvas.bind_all("<MouseWheel>", lambda event: self.scroll_on_mousewheel(canvas, event))
+
+        # making all the objects visible
+
+        x_scrollbar.pack(side=BOTTOM, fill=X)
+        self.image_frame.pack(fill=BOTH, expand=TRUE)  # expand leaves no empty grey spaces if the image is too small
+
+        # put this right after defining the scrollbar to make it take all of the y-axis
+        y_scrollbar.pack(side=RIGHT, fill=Y)
+        frame.pack(expand=True)  # "expand = True" centers the image vertically in this case
+        canvas.pack()
+
     def upload_image(self, image_file):
+
         img = Image.open(image_file)
+
 
         render = ImageTk.PhotoImage(img)
         self.render = render  # prevent being garbage collected, might not show up the image otherwise
@@ -205,7 +283,7 @@ class GUI(Tk):
         for item in list:
             item.destroy()
         self.image_frame.pack_forget()
-        
+
     def close_files(self):
         self.close_image()
         self.text.set("Page " + "0/0")
@@ -235,6 +313,65 @@ class GUI(Tk):
 
         image = Image.open(filepath)
         image = image.rotate(90, expand=True)
+
+        os.remove(old_file)
+
+        image.save(filepath)
+        self.close_image()
+        self.upload_image(filepath)
+
+    def zoomimagelarger(self, filepath):
+
+        from PIL import Image
+
+        img = Image.open(filepath)
+        w, h = img.size
+        w_s = int(w * 2)  # 长宽缩小两倍
+        h_s = int(h * 2)  # 长宽缩小两倍
+        img = img.resize((w_s, h_s), Image.ANTIALIAS)
+        blank = (w_s - h_s) * 2
+        # img.crop((w0, h0, w1, h1)) w0，h0宽度，高度起始方向剪裁的值，为负时是增加尺寸，
+        # w1, h1宽度，高度方向结束的位置，
+        img = img.crop((0, -blank, w_s, w_s - blank))
+        # img = img.crop((100, 100, w_s+100, h_s-100))
+        img.save(filepath)
+        self.close_image()
+        self.upload_image(filepath)
+
+    def zoomimagesmaller(self, filepath):
+
+        from PIL import Image
+
+        img = Image.open(filepath)
+        w, h = img.size
+        w_s = int(w / 2)  # 长宽缩小两倍
+        h_s = int(h / 2)  # 长宽缩小两倍
+        img = img.resize((w_s, h_s), Image.ANTIALIAS)
+        blank = (w_s - h_s) / 2
+        # img.crop((w0, h0, w1, h1)) w0，h0宽度，高度起始方向剪裁的值，为负时是增加尺寸，
+        # w1, h1宽度，高度方向结束的位置，
+        img = img.crop((0, -blank, w_s, w_s - blank))
+        # img = img.crop((100, 100, w_s+100, h_s-100))
+        img.save(filepath)
+        self.close_image()
+        self.upload_image(filepath)
+
+    def enhance_image(self, filepath, cvalue, bvalue):
+        """This function enhance the image to remove text bleed through"""
+        old_file = filepath
+
+        image = Image.open(filepath)
+
+        contrast_enhancer = ImageEnhance.Contrast(image)
+        bright_enhancer = ImageEnhance.Brightness(image)
+        # give the factor to adjust the image
+        contrast_image = contrast_enhancer.enhance(cvalue)
+        bright_image = bright_enhancer.enhance(bvalue)
+
+        image = contrast_image
+        image.save(filepath)
+
+        image = bright_image
 
         os.remove(old_file)
 
@@ -283,7 +420,7 @@ class File:
 
         # file types/extensions allowed
         files = [("All Files", "*.*"), ("PDF", "*.pdf"), ("JPG", "*.jpg"), ("JPEG", "*.jpeg"), ("PNG", "*.png")]
-        
+
         if not files:
             gui.text.set("Page " + "0/0")
 
@@ -320,7 +457,7 @@ class File:
 
         gui.current_file.set_img_list(new_file_list)
 
-        gui.upload_image(gui.current_file.get_img(1))
+        gui.upload_file_image(gui.current_file.get_img(1))
 
         list_length = len(new_file_list)
         gui.current_file.num_pages = list_length
