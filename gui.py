@@ -110,7 +110,6 @@ class GUI(Tk):
         # #223985 for dark blue color, #FF7789 for pink
         button_frame2 = Frame(self, height=25, bg="#FFD100", bd=0, highlightthickness=0)
         # packs the button frame
-        button_frame2.pack(side=BOTTOM, fill=BOTH)
         button_frame.pack(side=TOP, fill=BOTH)
 
         # prevents "buttom_frame" from shrinking when packing "options_frame"
