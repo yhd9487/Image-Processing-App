@@ -111,6 +111,7 @@ class GUI(Tk):
         button_frame2 = Frame(self, height=25, bg="#FFD100", bd=0, highlightthickness=0)
         # packs the button frame
         button_frame.pack(side=TOP, fill=BOTH)
+        button_frame2.pack(side=BOTTOM, fill=BOTH)
 
         # prevents "buttom_frame" from shrinking when packing "options_frame"
         button_frame.pack_propagate(0)
