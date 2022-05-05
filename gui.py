@@ -349,12 +349,10 @@ class GUI(Tk):
 
         img = Image.open(filepath)
         w, h = img.size
-        w_s = int(w * 1.15)  # 长宽缩小两倍
-        h_s = int(h * 1.15)  # 长宽缩小两倍
+        w_s = int(w * 2)
+        h_s = int(h * 2)
         img = img.resize((w_s, h_s), Image.ANTIALIAS)
         blank = (w_s - h_s) * 1.15
-        # img.crop((w0, h0, w1, h1)) w0，h0宽度，高度起始方向剪裁的值，为负时是增加尺寸，
-        # w1, h1宽度，高度方向结束的位置，
         img = img.crop((0, -blank, w_s, w_s - blank))
         # img = img.crop((100, 100, w_s+100, h_s-100))
         img.save(filepath)
@@ -367,12 +365,10 @@ class GUI(Tk):
 
         img = Image.open(filepath)
         w, h = img.size
-        w_s = int(w / 1.15)  # 长宽缩小两倍
-        h_s = int(h / 1.15)  # 长宽缩小两倍
+        w_s = int(w / 1.15)
+        h_s = int(h / 1.15)
         img = img.resize((w_s, h_s), Image.ANTIALIAS)
         blank = (w_s - h_s) / 1.15
-        # img.crop((w0, h0, w1, h1)) w0，h0宽度，高度起始方向剪裁的值，为负时是增加尺寸，
-        # w1, h1宽度，高度方向结束的位置，
         img = img.crop((0, -blank, w_s, w_s - blank))
         # img = img.crop((100, 100, w_s+100, h_s-100))
         img.save(filepath)
