@@ -29,8 +29,8 @@ class GUI(Tk):
         self.configure(bg="#465CA5")  # bg = E6E6E6
 
         # setting window size and position
-        window_width = 1030
-        window_height = 720
+        window_width = 1000
+        window_height = 950
 
         # set the minimum window size
         self.minsize(1030, 720)
@@ -108,7 +108,7 @@ class GUI(Tk):
         # frame for buttons
         button_frame = Frame(self, height=130, bg="#FFD100", bd=0, highlightthickness=0)
         # #223985 for dark blue color, #FF7789 for pink
-        button_frame2 = Frame(self, height=25, bg="#FFD100", bd=0, highlightthickness=0)
+        button_frame2 = Frame(self, height=5, bg="#FFD100", bd=0, highlightthickness=0)
         # packs the button frame
         button_frame.pack(side=TOP, fill=BOTH)
         button_frame2.pack(side=BOTTOM, fill=BOTH)
@@ -151,13 +151,18 @@ class GUI(Tk):
                          command=lambda: self.enhance_image(self.current_file.get_img(
                              self.current_file.page), cSlideBar.get(), 1 + bSlideBar.get() / 10))
 
-        button6 = Button(self.options_frame2, text="+", font=("Arial", 9), bd=3,
+        button6 = Button(self.options_frame2, text="size +", font=("Arial", 9), bd=3,
                          command=lambda: self.zoomimagelarger(self.current_file.get_img(
                              self.current_file.page)))
 
-        button7 = Button(self.options_frame2, text="-", font=("Arial", 9), bd=3,
+        button7 = Button(self.options_frame2, text="size -", font=("Arial", 9), bd=3,
                          command=lambda: self.zoomimagesmaller(self.current_file.get_img(
                              self.current_file.page)))
+
+        button8 = Button(self.options_frame2, text="resize", font=("Arial", 9), bd=3,
+                         command=lambda: self.resize(self.current_file.get_img(
+                             self.current_file.page)))
+
         cSlideBar = Scale(self.options_frame, label="Contrast", from_=0, to=20, orient=HORIZONTAL)
         bSlideBar = Scale(self.options_frame, label="Brightness", from_=0, to=20, orient=HORIZONTAL)
         # set scale to to recommend value
@@ -167,13 +172,14 @@ class GUI(Tk):
         # packing buttons
         # button1.pack(padx=(170, 35), pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
         # button2.pack(padx=35, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
-        button3.pack(padx=20, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
-        button4.pack(padx=20, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
+        button3.pack(padx=20, pady=(0, 40), ipadx=5, ipady=5, side=LEFT)
+        button4.pack(padx=20, pady=(0, 40), ipadx=5, ipady=5, side=LEFT)
         button5.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=LEFT)
         button6.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=RIGHT)
-        button7.pack(padx=5, pady=(0, 60), ipadx=5, ipady=5, side=RIGHT)
-        cSlideBar.pack(padx=5, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
-        bSlideBar.pack(padx=5, pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
+        button7.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=RIGHT)
+        button8.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=RIGHT)
+        cSlideBar.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=LEFT)
+        bSlideBar.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=LEFT)
 
         # entry box for entering numbers to display specific pages
         self.entry_frame = Frame(self.options_frame)
@@ -240,7 +246,6 @@ class GUI(Tk):
     def upload_image(self, image_file):
 
         img = Image.open(image_file)
-
 
         render = ImageTk.PhotoImage(img)
         self.render = render  # prevent being garbage collected, might not show up the image otherwise
@@ -320,16 +325,34 @@ class GUI(Tk):
         self.close_image()
         self.upload_image(filepath)
 
+    def resize(self, filepath):
+
+        from PIL import Image
+
+        img = Image.open(filepath)
+        w, h = img.size
+        w_s = 560
+        h_s = 750
+        img = img.resize((w_s, h_s), Image.ANTIALIAS)
+        blank = 0
+        # img.crop((w0, h0, w1, h1)) w0，h0宽度，高度起始方向剪裁的值，为负时是增加尺寸，
+        # w1, h1宽度，高度方向结束的位置，
+        img = img.crop((0, -blank, w_s, w_s - blank))
+        # img = img.crop((100, 100, w_s+100, h_s-100))
+        img.save(filepath)
+        self.close_image()
+        self.upload_image(filepath)
+
     def zoomimagelarger(self, filepath):
 
         from PIL import Image
 
         img = Image.open(filepath)
         w, h = img.size
-        w_s = int(w * 2)  # 长宽缩小两倍
-        h_s = int(h * 2)  # 长宽缩小两倍
+        w_s = int(w * 1.15)  # 长宽缩小两倍
+        h_s = int(h * 1.15)  # 长宽缩小两倍
         img = img.resize((w_s, h_s), Image.ANTIALIAS)
-        blank = (w_s - h_s) * 2
+        blank = (w_s - h_s) * 1.15
         # img.crop((w0, h0, w1, h1)) w0，h0宽度，高度起始方向剪裁的值，为负时是增加尺寸，
         # w1, h1宽度，高度方向结束的位置，
         img = img.crop((0, -blank, w_s, w_s - blank))
@@ -344,10 +367,10 @@ class GUI(Tk):
 
         img = Image.open(filepath)
         w, h = img.size
-        w_s = int(w / 2)  # 长宽缩小两倍
-        h_s = int(h / 2)  # 长宽缩小两倍
+        w_s = int(w / 1.15)  # 长宽缩小两倍
+        h_s = int(h / 1.15)  # 长宽缩小两倍
         img = img.resize((w_s, h_s), Image.ANTIALIAS)
-        blank = (w_s - h_s) / 2
+        blank = (w_s - h_s) / 1.15
         # img.crop((w0, h0, w1, h1)) w0，h0宽度，高度起始方向剪裁的值，为负时是增加尺寸，
         # w1, h1宽度，高度方向结束的位置，
         img = img.crop((0, -blank, w_s, w_s - blank))
