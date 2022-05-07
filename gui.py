@@ -113,7 +113,7 @@ class GUI(Tk):
         button_frame.pack(side=TOP, fill=BOTH)
         button_frame2.pack(side=BOTTOM, fill=BOTH)
 
-        # prevents "buttom_frame" from shrinking when packing "options_frame"
+        # prevents "bottom_frame" from shrinking when packing "options_frame"
         button_frame.pack_propagate(0)
 
         # Functionless button to hold the options text
@@ -128,7 +128,7 @@ class GUI(Tk):
         self.options_frame.pack(padx=6, pady=6, fill=BOTH, expand=TRUE)
 
         self.options_frame2 = LabelFrame(button_frame2, fg="green", bg="#FFD100",
-                                        bd=1, labelanchor=NW, labelwidget=options_title)
+                                         bd=1, labelanchor=NW, labelwidget=options_title)
         self.options_frame2.pack(padx=2, pady=2, fill=BOTH, expand=TRUE)
 
         # makes option buttons
@@ -168,6 +168,8 @@ class GUI(Tk):
         # set scale to to recommend value
         cSlideBar.set(5)
         bSlideBar.set(1)
+        button9 = Button(self.options_frame, text="Undo", bd=3, compound="left",
+                         command=lambda: self.undo())
 
         # packing buttons
         # button1.pack(padx=(170, 35), pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
@@ -178,6 +180,7 @@ class GUI(Tk):
         button6.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=RIGHT)
         button7.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=RIGHT)
         button8.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=RIGHT)
+        button9.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=RIGHT)
         cSlideBar.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=LEFT)
         bSlideBar.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=LEFT)
 
@@ -199,7 +202,7 @@ class GUI(Tk):
         canvas.yview_scroll(-1 * (event.delta // 120), "units")
 
     # getting an image and rendering it
-    def upload_file_image(self,image_fileimage):
+    def upload_file_image(self, image_fileimage):
         from PIL import Image
 
         baseheight = 560
@@ -393,6 +396,9 @@ class GUI(Tk):
         image.save(filepath)
         self.close_image()
         self.upload_image(filepath)
+
+    def undo_stack(self, file):
+        """This function saves maximum 10 previous changes made by user"""
 
 
 class File:
