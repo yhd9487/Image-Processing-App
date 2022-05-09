@@ -168,8 +168,8 @@ class GUI(Tk):
         # set scale to to recommend value
         cSlideBar.set(5)
         bSlideBar.set(1)
-        button9 = Button(self.options_frame, text="Undo", bd=3, compound="left",
-                         command=lambda: self.undo())
+        # button9 = Button(self.options_frame, text="Undo", bd=3, compound="left",command=lambda: self.undo_stack(
+        # self.current_file.get_img(self.current_file.page)))   # TODO This function has not finished yet
 
         # packing buttons
         # button1.pack(padx=(170, 35), pady=(0, 14), ipadx=5, ipady=5, side=LEFT)
@@ -180,7 +180,7 @@ class GUI(Tk):
         button6.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=RIGHT)
         button7.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=RIGHT)
         button8.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=RIGHT)
-        button9.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=RIGHT)
+        # button9.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=RIGHT)  # TODO This function has not finished yet
         cSlideBar.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=LEFT)
         bSlideBar.pack(padx=5, pady=(0, 40), ipadx=5, ipady=5, side=LEFT)
 
@@ -397,8 +397,18 @@ class GUI(Tk):
         self.close_image()
         self.upload_image(filepath)
 
-    def undo_stack(self, file):
+    def undo_stack(self, filepath):  # TODO This function has not finished yet
         """This function saves maximum 10 previous changes made by user"""
+        stack = []
+        stack.append(filepath)
+        # image = Image.open(filepath)
+        # image.save(filepath)
+        # self.upload_image(filepath)
+        print(len(stack))
+
+    def undo(self):  # TODO This function has not finished yet
+        """This function implements undo"""
+        self.undo_stack()
 
 
 class File:
