@@ -26,5 +26,5 @@ and insert the full filepath to line 272 of gui.py.
 
 CONTACT
 
-You can contact the collaborators (agnesmonostori and okorotkyi)
+You can contact the collaborators (agnesmonostori and okorotkyi) (yhd9487, Jfort13, KeWang-HSK)
 or the client (Jmuccigr) for questions, ideas or suggestions.
